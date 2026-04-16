@@ -12,7 +12,7 @@ from cities  import CITIES
 st.set_page_config(
     page_title="Ravel — Where are you going?",
     page_icon="✈",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state="collapsed",
 )
 
@@ -40,15 +40,90 @@ st.markdown("""
 
 /* ── Global resets ── */
 #MainMenu, footer, header { visibility: hidden; }
+
+/* Desktop: centre content in 820px column */
 .block-container {
-  padding-top: 1.75rem;
-  padding-bottom: 3rem;
-  max-width: 800px;
+  padding: 1.75rem 2rem 3rem !important;
+  max-width: 820px !important;
+  margin: 0 auto !important;
 }
+
 html, body, [data-testid="stAppViewContainer"] {
   background: var(--bg);
   font-family: ui-sans-serif, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: var(--text);
+}
+
+/* ── Tablet (≤ 900px) ── */
+@media (max-width: 900px) {
+  .block-container { padding: 1.25rem 1.25rem 2.5rem !important; }
+  .hero-title { font-size: 2rem !important; }
+}
+
+/* ── Mobile (≤ 640px) ── */
+@media (max-width: 640px) {
+  .block-container { padding: 1rem 0.85rem 2rem !important; max-width: 100% !important; }
+
+  /* Typography scale-down */
+  .hero-title { font-size: 1.75rem !important; }
+  .hero-sub   { font-size: .93rem !important; }
+  .type-name  { font-size: 1.5rem !important; }
+  .cat-name   { font-size: 1.2rem !important; }
+
+  /* Cards: tighten padding */
+  .card { padding: 1.2rem 1.1rem !important; }
+  .type-card { padding: 1.4rem 1.2rem !important; }
+  .stop-card { padding: .9rem 1rem !important; }
+
+  /* Nav: stack wordmark above nav pills */
+  [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; }
+
+  /* Pills: allow wrapping on mobile */
+  div[data-testid="stRadio"] div[role="radiogroup"] {
+    flex-wrap: wrap !important;
+    gap: .3rem !important;
+  }
+  div[data-testid="stRadio"] div[role="radiogroup"] label {
+    flex: 0 1 auto !important;
+    font-size: .78rem !important;
+    padding: .35rem .7rem !important;
+  }
+
+  /* Scale legend: hide on mobile (redundant) */
+  .q-scale-legend { display: none !important; }
+
+  /* Stat pills: 2 columns on mobile */
+  .stat-row { gap: .5rem !important; }
+  .stat-pill { min-width: calc(50% - .25rem) !important; }
+
+  /* Intro 3-col grid → single column */
+  div[style*="grid-template-columns: 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Phase 2 & cost 2-col grid → single column */
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Timeline: tighten left spacing */
+  .timeline { padding-left: 1rem !important; }
+  .tl-item  { padding-left: .9rem !important; }
+
+  /* Map: shorter on mobile */
+  [data-testid="stPlotlyChart"] { min-height: 240px !important; }
+
+  /* Expander headers */
+  [data-testid="stExpander"] summary { font-size: .88rem !important; }
+
+  /* Download buttons: full width on mobile */
+  .stDownloadButton button { width: 100% !important; font-size: .83rem !important; }
+
+  /* Selectbox labels */
+  [data-testid="stSelectbox"] label { font-size: .85rem !important; }
+
+  /* Slider */
+  [data-testid="stSlider"] label { font-size: .85rem !important; }
 }
 
 /* ── Page-entry fade ── */
@@ -343,11 +418,12 @@ def render_radar(scores, title="Your Travel Profile"):
             radialaxis=dict(visible=True, range=[0,5], tickvals=[1,2,3,4,5],
                             tickfont=dict(size=9,color="#9ca3af"),
                             gridcolor="#e5e7eb", linecolor="#e5e7eb"),
-            angularaxis=dict(tickfont=dict(size=12,color="#111827"),
+            angularaxis=dict(tickfont=dict(size=11,color="#111827"),
                              gridcolor="#e5e7eb", linecolor="#e5e7eb"),
         ),
         paper_bgcolor="#ffffff", showlegend=False,
-        margin=dict(t=44,b=44,l=44,r=44),
+        autosize=True,
+        margin=dict(t=40,b=40,l=30,r=30),
         title=dict(text=title, font=dict(size=14,color="#111827"), x=0.5),
     )
     st.markdown('<div class="card" style="padding:.75rem">', unsafe_allow_html=True)
@@ -828,7 +904,7 @@ elif page == "router":
             ),
             margin=dict(t=8, b=8, l=0, r=0),
             paper_bgcolor="#ffffff",
-            showlegend=False, height=340,
+            showlegend=False, height=320,
         )
         st.markdown('<div class="card" style="padding:.75rem">', unsafe_allow_html=True)
         st.plotly_chart(fig_map, use_container_width=True, config={"displayModeBar":False})
