@@ -492,9 +492,24 @@ def render_score_bars(scores):
     st.markdown(f'<div class="card">{rows}</div>', unsafe_allow_html=True)
 
 def render_radar(scores, title="Your Travel Profile"):
-    cats = list(scores.keys()); vals = list(scores.values())
+    # Shorten long labels so they fit inside the polar plot margins
+    LABEL_MAP = {
+        "Adventure":      "Adventure",
+        "Budget":         "Budget",
+        "Culture":        "Culture",
+        "Relaxation":     "Wellness",
+        "Food":           "Food",
+        "Shopping":       "Shopping",
+        "Transportation": "Transit",
+        "Accommodation":  "Lodging",
+        "Social":         "Social",
+    }
+    cats = list(scores.keys())
+    vals = list(scores.values())
+    labels = [LABEL_MAP.get(c, c) for c in cats]
+
     fig = go.Figure(go.Scatterpolar(
-        r=vals+[vals[0]], theta=cats+[cats[0]],
+        r=vals+[vals[0]], theta=labels+[labels[0]],
         fill="toself", fillcolor="rgba(19,117,240,0.12)",
         line=dict(color="#1375f0", width=2.5),
         hovertemplate="<b>%{theta}</b><br>Score: %{r:.1f}<extra></extra>",
@@ -502,21 +517,27 @@ def render_radar(scores, title="Your Travel Profile"):
     fig.update_layout(
         polar=dict(
             bgcolor="#f8fafc",
-            radialaxis=dict(visible=True, range=[0,5], tickvals=[1,2,3,4,5],
-                            tickfont=dict(size=9,color="#9ca3af"),
-                            gridcolor="#e5e7eb", linecolor="#e5e7eb"),
-            angularaxis=dict(tickfont=dict(size=11,color="#111827"),
-                             gridcolor="#e5e7eb", linecolor="#e5e7eb"),
+            hole=0.05,
+            radialaxis=dict(
+                visible=True, range=[0,5], tickvals=[1,2,3,4,5],
+                tickfont=dict(size=8, color="#9ca3af"),
+                gridcolor="#e5e7eb", linecolor="#e5e7eb",
+            ),
+            angularaxis=dict(
+                tickfont=dict(size=10, color="#111827"),
+                gridcolor="#e5e7eb", linecolor="#e5e7eb",
+            ),
         ),
         paper_bgcolor="#ffffff", showlegend=False,
         autosize=True,
-        margin=dict(t=40,b=40,l=30,r=30),
-        title=dict(text=title, font=dict(size=14,color="#111827"), x=0.5),
+        # Large margins keep all 9 labels inside the card on every screen size
+        margin=dict(t=70, b=70, l=80, r=80),
+        title=dict(text=title, font=dict(size=13, color="#111827"), x=0.5, y=0.97),
     )
     st.markdown('<div class="card" style="padding:.75rem">', unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True, config={
         "displayModeBar": False,
-        "staticPlot": True,   # disables all touch/mouse interactions on mobile
+        "staticPlot": True,
     })
     st.markdown("</div>", unsafe_allow_html=True)
 
