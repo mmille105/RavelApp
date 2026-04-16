@@ -409,6 +409,21 @@ for k, v in DEFAULTS.items():
     if k not in st.session_state:
         st.session_state[k] = v
 
+# ── Restore profile from URL query params (persists across refresh / sharing) ──
+_SCORE_CATS = ["Adventure", "Budget", "Culture", "Relaxation", "Food", "Shopping"]
+if not st.session_state.scores:
+    _qp = st.query_params
+    if all(c in _qp for c in _SCORE_CATS):
+        try:
+            _restored = {c: float(_qp[c]) for c in _SCORE_CATS}
+            st.session_state.scores = _restored
+            st.session_state.quiz_step = 7
+            _tt, _td, _ = classify_traveler(_restored)
+            st.session_state.traveler_type = _tt
+            st.session_state.traveler_desc = _td
+        except Exception:
+            pass  # malformed params — ignore and start fresh
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Top navigation
 # ─────────────────────────────────────────────────────────────────────────────
@@ -679,11 +694,21 @@ if page == "profile":
 
     # ── 7: Results ────────────────────────────────────────────────────────
     elif step == 7:
-        scores = calculate_scores(st.session_state.responses, CATEGORIES)
-        traveler_type, description, dominant = classify_traveler(scores)
-        st.session_state.scores         = scores
-        st.session_state.traveler_type  = traveler_type
-        st.session_state.traveler_desc  = description
+        # Recalculate only if we have raw responses (fresh quiz completion).
+        # If we were restored from URL params, session scores are already set.
+        if st.session_state.responses:
+            scores = calculate_scores(st.session_state.responses, CATEGORIES)
+            traveler_type, description, dominant = classify_traveler(scores)
+            st.session_state.scores        = scores
+            st.session_state.traveler_type = traveler_type
+            st.session_state.traveler_desc = description
+            # Persist profile in URL so it survives refresh / can be shared
+            st.query_params.update({c: f"{v:.2f}" for c, v in scores.items()})
+        else:
+            scores       = st.session_state.scores
+            traveler_type = st.session_state.traveler_type
+            description   = st.session_state.traveler_desc
+            dominant      = max(scores, key=scores.get)
 
         top2    = sorted(scores, key=scores.get, reverse=True)[:2]
         top_val = scores[dominant]
@@ -724,6 +749,10 @@ if page == "profile":
             if st.button("Retake quiz", use_container_width=True):
                 st.session_state.quiz_step = 0
                 st.session_state.responses = {}
+                st.session_state.scores    = {}
+                st.session_state.traveler_type = ""
+                st.session_state.traveler_desc = ""
+                st.query_params.clear()
                 st.rerun()
 
         st.markdown("""
