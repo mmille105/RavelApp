@@ -79,8 +79,26 @@ html, body, [data-testid="stAppViewContainer"] {
   /* Nav: stack wordmark above nav pills */
   [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; }
 
-  /* But keep Back / Next buttons always side-by-side inside the form */
-  [data-testid="stForm"] [data-testid="stHorizontalBlock"] { flex-wrap: nowrap !important; }
+  /* Back / Next always side-by-side, clipped to viewport */
+  [data-testid="stForm"] [data-testid="stHorizontalBlock"] {
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    gap: 0.4rem !important;
+  }
+  [data-testid="stForm"] [data-testid="stHorizontalBlock"] > div {
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+    padding: 0 !important;
+  }
+  /* Slightly smaller button text on mobile so it breathes */
+  [data-testid="stForm"] .stButton > button,
+  [data-testid="stForm"] .stFormSubmitButton > button {
+    font-size: .82rem !important;
+    padding: .55rem .5rem !important;
+  }
 
   /* Quiz pills on mobile — keep branded style, compact gap */
   [data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] {
