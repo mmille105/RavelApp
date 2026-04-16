@@ -78,15 +78,14 @@ html, body, [data-testid="stAppViewContainer"] {
   /* Nav: stack wordmark above nav pills */
   [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; }
 
-  /* Quiz pills on mobile — numeric digits, compact square */
+  /* Quiz pills on mobile — keep branded style, compact gap */
   [data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] {
     gap: .3rem !important;
   }
   [data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label {
     font-size: 1rem !important;
-    font-weight: 700 !important;
-    padding: .6rem .1rem !important;
     min-height: 2.75rem !important;
+    border-width: 1.5px !important;
   }
 
   /* Scale legend: stays visible on mobile — numbers need the context */
@@ -167,7 +166,7 @@ html, body, [data-testid="stAppViewContainer"] {
 .cat-name { font-size:1.4rem; font-weight:800; }
 .cat-sub  { font-size:.88rem; color:var(--muted); margin-bottom:1.5rem; }
 
-/* ── Nav radio (2 options) — clean horizontal tabs ── */
+/* ── Nav radio — slim tab-style pills ── */
 div[data-testid="stRadio"] div[role="radiogroup"] {
   display: flex !important;
   flex-direction: row !important;
@@ -175,28 +174,35 @@ div[data-testid="stRadio"] div[role="radiogroup"] {
   margin-top: 0 !important;
 }
 div[data-testid="stRadio"] div[role="radiogroup"] label {
-  background: #f1f5f9 !important;
+  background: #fff !important;
   border: 1.5px solid var(--border) !important;
-  border-radius: .6rem !important;
-  padding: .45rem 1.1rem !important;
-  font-size: .88rem !important;
-  font-weight: 500 !important;
+  border-radius: 99px !important;
+  padding: .3rem .95rem !important;
+  font-size: .82rem !important;
+  font-weight: 600 !important;
   cursor: pointer !important;
   transition: background .12s, border-color .12s, color .12s !important;
   white-space: nowrap !important;
-  color: var(--text) !important;
+  color: var(--muted) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,.07) !important;
 }
 div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
   background: var(--blue) !important;
   border-color: var(--blue) !important;
   color: #fff !important;
   font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(19,117,240,.28) !important;
 }
+/* Hide the actual radio circle on all radio buttons */
 div[data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {
   display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
 }
 
 /* ── Quiz radio pills — scoped to inside st.form only ── */
@@ -215,36 +221,48 @@ div[data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {
 [data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] {
   display: grid !important;
   grid-template-columns: repeat(5, 1fr) !important;
-  gap: .35rem !important;
+  gap: .4rem !important;
   margin-top: .5rem !important;
   width: 100% !important;
 }
 
-/* Quiz pill cells — single digit numbers, clean square */
+/* Hide the radio circle dot — force truly centered number */
+[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  pointer-events: none !important;
+}
+
+/* Quiz pill cells — branded number buttons */
 [data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label {
-  background: #f1f5f9 !important;
-  border: 1.5px solid var(--border) !important;
-  border-radius: .6rem !important;
-  padding: .55rem .1rem !important;
-  font-size: 1rem !important;
+  background: #fff !important;
+  border: 2px solid var(--blue) !important;
+  border-radius: .65rem !important;
+  padding: 0 !important;
+  font-size: 1.05rem !important;
   font-weight: 700 !important;
   cursor: pointer !important;
   white-space: nowrap !important;
-  color: var(--text) !important;
+  color: var(--blue) !important;
   text-align: center !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   line-height: 1 !important;
   min-height: 2.75rem !important;
-  transition: background .12s, border-color .12s, color .12s !important;
+  transition: background .12s, border-color .12s, color .12s, box-shadow .12s !important;
   letter-spacing: 0 !important;
+  box-shadow: 0 1px 4px rgba(19,117,240,.12) !important;
 }
 [data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
   background: var(--blue) !important;
   border-color: var(--blue) !important;
   color: #fff !important;
-  font-weight: 700 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 3px 10px rgba(19,117,240,.35) !important;
 }
 
 /* ── Question card wrapper for quiz ── */
