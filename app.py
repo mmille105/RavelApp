@@ -490,11 +490,11 @@ STEPS = [
      ]},
     {"category":"Budget",     "emoji":"💰", "tagline":"How do you think about spending on travel?",
      "questions":[
-         ("Q6",  "I look for the cheapest flights and accommodations available."),
-         ("Q7",  "I track my spending carefully during trips."),
-         ("Q8",  "I prefer free or low-cost activities over paid attractions."),
-         ("Q9",  "I'm willing to sacrifice comfort to save money while travelling."),
-         ("Q10", "Getting value for money is my top priority when booking a trip."),
+         ("Q6",  "Transportation: I search for the cheapest flights, trains, or buses rather than paying for speed or comfort."),
+         ("Q7",  "Accommodation: I choose budget stays (hostels, budget hotels, Airbnb) over comfort or luxury options."),
+         ("Q8",  "Food: I prefer eating at local, inexpensive spots rather than restaurants or fine dining."),
+         ("Q9",  "Activities: I prioritise free or low-cost attractions over paid experiences or guided tours."),
+         ("Q10", "Souvenirs & Shopping: I set a strict budget for souvenirs and stick to it, even when tempted."),
      ]},
     {"category":"Culture",    "emoji":"🏛️", "tagline":"How deeply do you dive into local culture?",
      "questions":[
