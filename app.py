@@ -514,7 +514,10 @@ def render_radar(scores, title="Your Travel Profile"):
         title=dict(text=title, font=dict(size=14,color="#111827"), x=0.5),
     )
     st.markdown('<div class="card" style="padding:.75rem">', unsafe_allow_html=True)
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar":False})
+    st.plotly_chart(fig, use_container_width=True, config={
+        "displayModeBar": False,
+        "staticPlot": True,   # disables all touch/mouse interactions on mobile
+    })
     st.markdown("</div>", unsafe_allow_html=True)
 
 
@@ -633,7 +636,7 @@ if page == "profile":
                          font-weight:600;color:#fff">✦ 9 travel dimensions</span>
             <span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
                          border-radius:99px;padding:.25rem .85rem;font-size:.78rem;
-                         font-weight:600;color:#fff">✦ 10 traveler types</span>
+                         font-weight:600;color:#fff">✦ 13 traveler types</span>
             <span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
                          border-radius:99px;padding:.25rem .85rem;font-size:.78rem;
                          font-weight:600;color:#fff">✦ ~3 minutes</span>
@@ -881,12 +884,21 @@ elif page == "router":
 
     # ── Persona library ────────────────────────────────────────────────────
     PERSONAS = {
+        # ── Single-dimension types ──
         "The Adventurer":           {"Adventure":4.6,"Budget":2.5,"Culture":3.0,"Relaxation":2.0,"Food":3.0,"Shopping":2.0,"Transportation":3.5,"Accommodation":2.5,"Social":3.0},
         "The Budget Explorer":      {"Adventure":3.0,"Budget":4.8,"Culture":3.0,"Relaxation":2.5,"Food":2.5,"Shopping":2.0,"Transportation":4.2,"Accommodation":4.5,"Social":3.0},
         "The Cultural Connoisseur": {"Adventure":2.0,"Budget":2.5,"Culture":4.8,"Relaxation":3.5,"Food":3.5,"Shopping":3.0,"Transportation":3.0,"Accommodation":3.5,"Social":3.0},
         "The Wellness Wanderer":    {"Adventure":2.0,"Budget":2.5,"Culture":3.0,"Relaxation":4.8,"Food":3.5,"Shopping":3.0,"Transportation":2.5,"Accommodation":4.5,"Social":2.0},
         "The Culinary Nomad":       {"Adventure":2.5,"Budget":3.0,"Culture":3.5,"Relaxation":3.0,"Food":4.8,"Shopping":2.5,"Transportation":3.0,"Accommodation":3.0,"Social":3.5},
         "The Style Traveler":       {"Adventure":2.0,"Budget":2.0,"Culture":3.5,"Relaxation":3.5,"Food":3.5,"Shopping":4.8,"Transportation":2.5,"Accommodation":4.0,"Social":3.5},
+        "The Transit Strategist":   {"Adventure":3.0,"Budget":3.5,"Culture":2.5,"Relaxation":2.5,"Food":2.5,"Shopping":2.0,"Transportation":4.8,"Accommodation":3.0,"Social":2.5},
+        "The Nest Builder":         {"Adventure":2.0,"Budget":2.5,"Culture":3.0,"Relaxation":4.0,"Food":3.0,"Shopping":2.5,"Transportation":2.5,"Accommodation":4.8,"Social":2.5},
+        "The Social Butterfly":     {"Adventure":3.0,"Budget":2.5,"Culture":3.5,"Relaxation":2.5,"Food":3.5,"Shopping":3.0,"Transportation":3.0,"Accommodation":3.0,"Social":4.8},
+        # ── Hybrid types ──
+        "The Thrill-Seeker Foodie": {"Adventure":4.5,"Budget":2.5,"Culture":3.0,"Relaxation":2.0,"Food":4.4,"Shopping":2.0,"Transportation":3.5,"Accommodation":2.5,"Social":3.5},
+        "The Cultured Foodie":      {"Adventure":2.0,"Budget":2.5,"Culture":4.5,"Relaxation":3.0,"Food":4.4,"Shopping":2.5,"Transportation":3.0,"Accommodation":3.5,"Social":3.0},
+        "The Luxury Escapist":      {"Adventure":2.0,"Budget":1.5,"Culture":3.0,"Relaxation":4.5,"Food":4.3,"Shopping":3.5,"Transportation":2.5,"Accommodation":4.5,"Social":2.5},
+        "The Savvy Culturalist":    {"Adventure":2.5,"Budget":4.2,"Culture":4.5,"Relaxation":3.0,"Food":3.0,"Shopping":2.5,"Transportation":3.5,"Accommodation":3.5,"Social":3.0},
     }
 
     # ── Profile source ─────────────────────────────────────────────────────
