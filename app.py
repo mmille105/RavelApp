@@ -78,18 +78,17 @@ html, body, [data-testid="stAppViewContainer"] {
   /* Nav: stack wordmark above nav pills */
   [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; }
 
-  /* Pills: allow wrapping on mobile */
+  /* Pills: tighter padding on mobile, grid already handles sizing */
   div[data-testid="stRadio"] div[role="radiogroup"] {
-    flex-wrap: wrap !important;
-    gap: .3rem !important;
+    gap: .25rem !important;
   }
   div[data-testid="stRadio"] div[role="radiogroup"] label {
-    flex: 0 1 auto !important;
-    font-size: .78rem !important;
-    padding: .35rem .7rem !important;
+    font-size: .72rem !important;
+    padding: .45rem .15rem !important;
+    min-height: 2.6rem !important;
   }
 
-  /* Scale legend: hide on mobile (redundant) */
+  /* Scale legend: hide on mobile (redundant with pill text) */
   .q-scale-legend { display: none !important; }
 
   /* Stat pills: 2 columns on mobile */
@@ -168,50 +167,46 @@ html, body, [data-testid="stAppViewContainer"] {
 .cat-name { font-size:1.4rem; font-weight:800; }
 .cat-sub  { font-size:.88rem; color:var(--muted); margin-bottom:1.5rem; }
 
-/* ── Radio pill buttons — option labels only (not the question label) ── */
+/* ── Radio pill buttons ── */
 
-/* Question label: render as normal readable text */
-div[data-testid="stRadio"] > label {
-  font-size: 1rem !important;
-  font-weight: 600 !important;
-  color: var(--text) !important;
-  line-height: 1.5 !important;
-  margin-bottom: .6rem !important;
-  display: block !important;
-  background: none !important;
-  border: none !important;
+/* Kill the "rating" ghost label — collapsed labels still render in some browsers */
+div[data-testid="stRadio"] [data-testid="stWidgetLabel"],
+div[data-testid="stRadio"] [data-testid="stWidgetLabel"] * {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
   padding: 0 !important;
-  border-radius: 0 !important;
-  cursor: default !important;
+  overflow: hidden !important;
 }
 
-/* Option container: horizontal flex row */
-div[data-testid="stRadio"] > div[data-testid="stRadioGroup"] > div,
+/* 5-column grid — always fits, any screen width */
 div[data-testid="stRadio"] div[role="radiogroup"] {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  gap: .4rem !important;
-  margin-top: .4rem !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: .35rem !important;
+  margin-top: .5rem !important;
+  width: 100% !important;
 }
 
 /* Individual option pills */
 div[data-testid="stRadio"] div[role="radiogroup"] label {
   background: #f1f5f9 !important;
   border: 1.5px solid var(--border) !important;
-  border-radius: 99px !important;
-  padding: .4rem .85rem !important;
-  font-size: .82rem !important;
+  border-radius: .6rem !important;
+  padding: .5rem .25rem !important;
+  font-size: .78rem !important;
   font-weight: 500 !important;
   cursor: pointer !important;
   transition: background .12s, border-color .12s, color .12s !important;
-  white-space: nowrap !important;
+  white-space: normal !important;
+  word-break: break-word !important;
   color: var(--text) !important;
-  flex: 1 !important;
   text-align: center !important;
-  justify-content: center !important;
   display: flex !important;
   align-items: center !important;
+  justify-content: center !important;
+  line-height: 1.3 !important;
+  min-height: 2.4rem !important;
 }
 div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
   background: var(--blue) !important;
