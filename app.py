@@ -79,6 +79,9 @@ html, body, [data-testid="stAppViewContainer"] {
   /* Nav: stack wordmark above nav pills */
   [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; }
 
+  /* But keep Back / Next buttons always side-by-side inside the form */
+  [data-testid="stForm"] [data-testid="stHorizontalBlock"] { flex-wrap: nowrap !important; }
+
   /* Quiz pills on mobile — keep branded style, compact gap */
   [data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] {
     gap: .3rem !important;
@@ -678,7 +681,7 @@ if page == "profile":
                 st.markdown("<div style='height:.25rem'></div>", unsafe_allow_html=True)
 
             st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
-            cb, _, cn = st.columns([1, 2, 1])
+            cb, cn = st.columns(2)
             with cb:
                 back = st.form_submit_button("← Back", use_container_width=True)
             with cn:
