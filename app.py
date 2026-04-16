@@ -258,17 +258,17 @@ div[data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {
   pointer-events: none !important;
 }
 
-/* Quiz pill cells — branded number buttons */
+/* Quiz pill base — white background, neutral border */
 [data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label {
   background: #fff !important;
-  border: 2px solid var(--blue) !important;
+  border: 2px solid #d1d5db !important;
   border-radius: .65rem !important;
   padding: 0 !important;
   font-size: 1.05rem !important;
   font-weight: 700 !important;
   cursor: pointer !important;
   white-space: nowrap !important;
-  color: var(--blue) !important;
+  color: #6b7280 !important;
   text-align: center !important;
   display: flex !important;
   align-items: center !important;
@@ -277,15 +277,21 @@ div[data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {
   min-height: 2.75rem !important;
   transition: background .12s, border-color .12s, color .12s, box-shadow .12s !important;
   letter-spacing: 0 !important;
-  box-shadow: 0 1px 4px rgba(19,117,240,.12) !important;
 }
-[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
-  background: var(--blue) !important;
-  border-color: var(--blue) !important;
-  color: #fff !important;
-  font-weight: 800 !important;
-  box-shadow: 0 3px 10px rgba(19,117,240,.35) !important;
-}
+
+/* Color-coded scale: 1=red → 3=grey → 5=green */
+[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label:nth-child(1) { border-color: #ef4444 !important; color: #ef4444 !important; }
+[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label:nth-child(2) { border-color: #f97316 !important; color: #f97316 !important; }
+[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label:nth-child(3) { border-color: #9ca3af !important; color: #6b7280 !important; }
+[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label:nth-child(4) { border-color: #4ade80 !important; color: #16a34a !important; }
+[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label:nth-child(5) { border-color: #16a34a !important; color: #15803d !important; }
+
+/* Selected: filled with the same colour */
+[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label:nth-child(1):has(input:checked) { background: #ef4444 !important; color: #fff !important; box-shadow: 0 3px 10px rgba(239,68,68,.35) !important; }
+[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label:nth-child(2):has(input:checked) { background: #f97316 !important; color: #fff !important; box-shadow: 0 3px 10px rgba(249,115,22,.35) !important; }
+[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label:nth-child(3):has(input:checked) { background: #9ca3af !important; color: #fff !important; box-shadow: 0 3px 10px rgba(156,163,175,.35) !important; }
+[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label:nth-child(4):has(input:checked) { background: #4ade80 !important; border-color: #4ade80 !important; color: #fff !important; box-shadow: 0 3px 10px rgba(74,222,128,.35) !important; }
+[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label:nth-child(5):has(input:checked) { background: #16a34a !important; border-color: #16a34a !important; color: #fff !important; box-shadow: 0 3px 10px rgba(22,163,74,.35) !important; }
 
 /* ── Question card wrapper for quiz ── */
 .q-card {
@@ -431,7 +437,7 @@ for k, v in DEFAULTS.items():
         st.session_state[k] = v
 
 # ── Restore profile from URL query params (persists across refresh / sharing) ──
-_SCORE_CATS = ["Adventure", "Budget", "Culture", "Relaxation", "Food", "Shopping"]
+_SCORE_CATS = ["Adventure", "Budget", "Culture", "Relaxation", "Food", "Shopping", "Transportation", "Accommodation", "Social"]
 if not st.session_state.scores:
     _qp = st.query_params
     if all(c in _qp for c in _SCORE_CATS):
@@ -464,6 +470,7 @@ page = "profile" if nav == "Travel Profile" else "router"
 CAT_COLORS = {
     "Adventure":"#1375f0","Budget":"#1bb368","Culture":"#8b5cf6",
     "Relaxation":"#f59e0b","Food":"#ef4444","Shopping":"#ec4899",
+    "Transportation":"#0ea5e9","Accommodation":"#a78bfa","Social":"#f43f5e",
 }
 
 # Numeric pills — always fit any screen width; legend provides context
@@ -563,6 +570,36 @@ STEPS = [
          ("Q28", "I set aside a specific budget for shopping on trips."),
          ("Q29", "I enjoy browsing boutiques, design stores, or flagship shops when I travel."),
      ]},
+    {"category":"Transportation", "emoji":"🚆", "tagline":"How do you get around when you travel?",
+     "questions":[
+         ("Q30", "Budget: I always look for the cheapest transport option, even if it takes longer or is less comfortable."),
+         ("Q31", "Comfort: I'm willing to pay more for a comfortable journey — business class, first-class train, etc."),
+         ("Q32", "Speed: Getting to my destination quickly matters — I'll pay extra for a faster route."),
+         ("Q33", "Air vs. ground: I prefer flying over trains or buses, even on shorter routes."),
+         ("Q34", "Flexibility: I'm comfortable mixing transport modes — flights, trains, buses, and ferries — on a single trip."),
+         ("Q35", "Public transit: In cities, I default to metro, buses, or trams rather than taxis or rideshare apps."),
+         ("Q36", "Walking: I'd rather walk between attractions to soak in the city than take any transport at all."),
+     ]},
+    {"category":"Accommodation", "emoji":"🏨", "tagline":"What does your ideal place to stay look like?",
+     "questions":[
+         ("Q37", "Hotels & resorts: I prefer staying in hotels or resorts with full amenities and services."),
+         ("Q38", "Homestays & local: I love homestays, B&Bs, or locally-run guesthouses over branded hotels."),
+         ("Q39", "Budget stays: I'm happy with budget accommodation — hostels, capsule hotels, cheap Airbnbs — to save money."),
+         ("Q40", "Comfort: A comfortable, well-appointed room matters a lot to me, regardless of cost."),
+         ("Q41", "Location: I'll pay more to stay centrally located rather than save money on a place far from the action."),
+         ("Q42", "Luxury: I enjoy treating myself to upscale or boutique hotels as part of the travel experience."),
+         ("Q43", "Variety: I like mixing up where I stay — a hostel one night, a nice hotel the next."),
+     ]},
+    {"category":"Social", "emoji":"🧑‍🤝‍🧑", "tagline":"Who do you travel with — and how do you like your crowd?",
+     "questions":[
+         ("Q44", "Crowds: I enjoy visiting lively, popular destinations with a buzzing atmosphere."),
+         ("Q45", "Friends & family: I prefer travelling with friends or family over solo trips."),
+         ("Q46", "Meeting people: I enjoy meeting other travellers and locals wherever I go."),
+         ("Q47", "Off-season: I prefer travelling off-season to dodge crowds, even if some things are closed."),
+         ("Q48", "Hidden gems: I seek out under-the-radar spots over famous tourist attractions."),
+         ("Q49", "Action: I like being where the energy is — busy markets, festivals, nightlife scenes."),
+         ("Q50", "Solo comfort: I'm completely comfortable travelling alone and making all my own decisions."),
+     ]},
 ]
 
 if page == "profile":
@@ -590,10 +627,10 @@ if page == "profile":
           <div style="display:flex;gap:.6rem;flex-wrap:wrap">
             <span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
                          border-radius:99px;padding:.25rem .85rem;font-size:.78rem;
-                         font-weight:600;color:#fff">✦ 29 questions</span>
+                         font-weight:600;color:#fff">✦ 50 questions</span>
             <span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
                          border-radius:99px;padding:.25rem .85rem;font-size:.78rem;
-                         font-weight:600;color:#fff">✦ 6 travel dimensions</span>
+                         font-weight:600;color:#fff">✦ 9 travel dimensions</span>
             <span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
                          border-radius:99px;padding:.25rem .85rem;font-size:.78rem;
                          font-weight:600;color:#fff">✦ 10 traveler types</span>
@@ -641,8 +678,8 @@ if page == "profile":
                 st.session_state.quiz_step = 1
                 st.rerun()
 
-    # ── 1-6: Questions ────────────────────────────────────────────────────
-    elif 1 <= step <= 6:
+    # ── 1-9: Questions ────────────────────────────────────────────────────
+    elif 1 <= step <= 9:
         # Scroll to top on every step navigation.
         # Step number is embedded in the HTML so Streamlit sees a NEW component
         # each time and re-executes the script (identical HTML would be cached).
@@ -664,10 +701,10 @@ if page == "profile":
         """, height=0)
 
         data = STEPS[step - 1]
-        pct  = int(((step-1) / 6) * 100)
+        pct  = int(((step-1) / 9) * 100)
         st.markdown(f"""
         <div class="prog-track"><div class="prog-fill" style="width:{pct}%"></div></div>
-        <p class="prog-label">Step {step} of 6 — {data['category']}</p>
+        <p class="prog-label">Step {step} of 9 — {data['category']}</p>
         <div class="cat-row">
           <span style="font-size:1.6rem">{data['emoji']}</span>
           <span class="cat-name">{data['category']}</span>
@@ -684,8 +721,8 @@ if page == "profile":
                 <div class="q-card">
                   <div class="q-text">{i+1}. {text}</div>
                   <div class="q-scale-legend">
-                    <span>1 = Strongly disagree</span>
-                    <span>5 = Strongly agree</span>
+                    <span style="color:#ef4444">● Disagree</span>
+                    <span style="color:#16a34a">Agree ●</span>
                   </div>
                 </div>""", unsafe_allow_html=True)
                 resp[qid] = st.radio(
@@ -703,7 +740,7 @@ if page == "profile":
             with cb:
                 back = st.form_submit_button("← Back", use_container_width=True)
             with cn:
-                label = "Next →" if step < 6 else "See my results ✨"
+                label = "Next →" if step < 9 else "See my results ✨"
                 nxt   = st.form_submit_button(label, use_container_width=True)
 
             if nxt:
@@ -715,8 +752,8 @@ if page == "profile":
                 st.session_state.quiz_step -= 1
                 st.rerun()
 
-    # ── 7: Results ────────────────────────────────────────────────────────
-    elif step == 7:
+    # ── 10: Results ────────────────────────────────────────────────────────
+    elif step == 10:
         # Recalculate only if we have raw responses (fresh quiz completion).
         # If we were restored from URL params, session scores are already set.
         if st.session_state.responses:
@@ -844,12 +881,12 @@ elif page == "router":
 
     # ── Persona library ────────────────────────────────────────────────────
     PERSONAS = {
-        "The Adventurer":           {"Adventure":4.6,"Budget":2.5,"Culture":3.0,"Relaxation":2.0,"Food":3.0,"Shopping":2.0},
-        "The Budget Explorer":      {"Adventure":3.0,"Budget":4.8,"Culture":3.0,"Relaxation":2.5,"Food":2.5,"Shopping":2.0},
-        "The Cultural Connoisseur": {"Adventure":2.0,"Budget":2.5,"Culture":4.8,"Relaxation":3.5,"Food":3.5,"Shopping":3.0},
-        "The Wellness Wanderer":    {"Adventure":2.0,"Budget":2.5,"Culture":3.0,"Relaxation":4.8,"Food":3.5,"Shopping":3.0},
-        "The Culinary Nomad":       {"Adventure":2.5,"Budget":3.0,"Culture":3.5,"Relaxation":3.0,"Food":4.8,"Shopping":2.5},
-        "The Style Traveler":       {"Adventure":2.0,"Budget":2.0,"Culture":3.5,"Relaxation":3.5,"Food":3.5,"Shopping":4.8},
+        "The Adventurer":           {"Adventure":4.6,"Budget":2.5,"Culture":3.0,"Relaxation":2.0,"Food":3.0,"Shopping":2.0,"Transportation":3.5,"Accommodation":2.5,"Social":3.0},
+        "The Budget Explorer":      {"Adventure":3.0,"Budget":4.8,"Culture":3.0,"Relaxation":2.5,"Food":2.5,"Shopping":2.0,"Transportation":4.2,"Accommodation":4.5,"Social":3.0},
+        "The Cultural Connoisseur": {"Adventure":2.0,"Budget":2.5,"Culture":4.8,"Relaxation":3.5,"Food":3.5,"Shopping":3.0,"Transportation":3.0,"Accommodation":3.5,"Social":3.0},
+        "The Wellness Wanderer":    {"Adventure":2.0,"Budget":2.5,"Culture":3.0,"Relaxation":4.8,"Food":3.5,"Shopping":3.0,"Transportation":2.5,"Accommodation":4.5,"Social":2.0},
+        "The Culinary Nomad":       {"Adventure":2.5,"Budget":3.0,"Culture":3.5,"Relaxation":3.0,"Food":4.8,"Shopping":2.5,"Transportation":3.0,"Accommodation":3.0,"Social":3.5},
+        "The Style Traveler":       {"Adventure":2.0,"Budget":2.0,"Culture":3.5,"Relaxation":3.5,"Food":3.5,"Shopping":4.8,"Transportation":2.5,"Accommodation":4.0,"Social":3.5},
     }
 
     # ── Profile source ─────────────────────────────────────────────────────

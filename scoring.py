@@ -3,12 +3,15 @@ Scoring engine for the Ravel travel questionnaire.
 """
 
 CATEGORIES = {
-    "Adventure":   ["Q1",  "Q2",  "Q3",  "Q4",  "Q5"],
-    "Budget":      ["Q6",  "Q7",  "Q8",  "Q9",  "Q10"],
-    "Culture":     ["Q11", "Q12", "Q13", "Q14", "Q15"],
-    "Relaxation":  ["Q16", "Q17", "Q18", "Q19", "Q20"],
-    "Food":        ["Q21", "Q22", "Q23", "Q24", "Q25"],
-    "Shopping":    ["Q26", "Q27", "Q28", "Q29"],
+    "Adventure":      ["Q1",  "Q2",  "Q3",  "Q4",  "Q5"],
+    "Budget":         ["Q6",  "Q7",  "Q8",  "Q9",  "Q10"],
+    "Culture":        ["Q11", "Q12", "Q13", "Q14", "Q15"],
+    "Relaxation":     ["Q16", "Q17", "Q18", "Q19", "Q20"],
+    "Food":           ["Q21", "Q22", "Q23", "Q24", "Q25"],
+    "Shopping":       ["Q26", "Q27", "Q28", "Q29"],
+    "Transportation":  ["Q30", "Q31", "Q32", "Q33", "Q34", "Q35", "Q36"],
+    "Accommodation":   ["Q37", "Q38", "Q39", "Q40", "Q41", "Q42", "Q43"],
+    "Social":          ["Q44", "Q45", "Q46", "Q47", "Q48", "Q49", "Q50"],
 }
 
 
@@ -69,6 +72,24 @@ TRAVELER_TYPES = [
         "name": "The Style Traveler",
         "description": "You blend retail therapy with wanderlust. Markets, boutiques, and local crafts are as important as the sights.",
         "primary": "Shopping",
+        "secondary": None,
+    },
+    {
+        "name": "The Transit Strategist",
+        "description": "Every leg of the journey is planned to perfection. You know the train schedules, the cheapest fares, and which metro line drops you closest to your hotel.",
+        "primary": "Transportation",
+        "secondary": None,
+    },
+    {
+        "name": "The Nest Builder",
+        "description": "Where you stay is as important as where you go. Whether it's a boutique hotel, a family homestay, or a perfectly located apartment, the right base makes the whole trip.",
+        "primary": "Accommodation",
+        "secondary": None,
+    },
+    {
+        "name": "The Social Butterfly",
+        "description": "Travel is a people sport for you. Whether it's rooftop bars buzzing with strangers, family road trips, or festivals packed with energy — you go where the action is.",
+        "primary": "Social",
         "secondary": None,
     },
     # --- Hybrid types (top-2 combinations) ---
