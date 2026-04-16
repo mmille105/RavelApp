@@ -622,21 +622,23 @@ if page == "profile":
 
     # ── 1-6: Questions ────────────────────────────────────────────────────
     elif 1 <= step <= 6:
-        # Scroll to top of page on every step load (fires on Next / Back only,
-        # since questions live inside st.form which suppresses interim reruns)
-        stc.html("""
+        # Scroll to top on every step navigation.
+        # Step number is embedded in the HTML so Streamlit sees a NEW component
+        # each time and re-executes the script (identical HTML would be cached).
+        stc.html(f"""
         <script>
-          (function() {
+          /* scroll-step-{step} */
+          (function() {{
             var tries = 0;
-            function scrollUp() {
+            function scrollUp() {{
               var el = window.parent.document.querySelector('section[data-testid="stMain"]')
                     || window.parent.document.querySelector('.main');
-              if (el) { el.scrollTo({top: 0, behavior: 'smooth'}); }
+              if (el) {{ el.scrollTo({{top: 0, behavior: 'instant'}}); }}
               window.parent.scrollTo(0, 0);
-              if (tries++ < 5) setTimeout(scrollUp, 80);
-            }
+              if (tries++ < 8) setTimeout(scrollUp, 60);
+            }}
             scrollUp();
-          })();
+          }})();
         </script>
         """, height=0)
 
