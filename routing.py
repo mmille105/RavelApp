@@ -28,7 +28,7 @@ Logic layers:
 """
 
 import math
-from cities import CITIES
+from cities import CITIES, CITY_TAGS
 from scoring import CATEGORIES
 
 # ── Tuning constants ────────────────────────────────────────────────────────
@@ -293,18 +293,30 @@ def _build_itinerary(origin, stops, destination, days, travel_month):
 
 
 # ── Trip cost estimate ────────────────────────────────────────────────────────
-def _estimate_cost(stops: list, days: int, origin: str, destination: str) -> dict:
-    """Returns low/high estimate and a per-city breakdown."""
+def _estimate_cost(stops: list, days: int, origin: str, destination: str,
+                   budget_weights: dict = None) -> dict:
+    """Returns low/high estimate and a per-city breakdown, adjusted by budget weights."""
+    budget_weights = budget_weights or {"transport": 25, "accommodation": 40, "activities": 35}
+
+    # Budget weight multiplier: default weights assume a balanced spend.
+    # If user skews toward cheaper accommodation, the multiplier drops.
+    accom_w  = budget_weights.get("accommodation", 40) / 40   # normalise to default
+    act_w    = budget_weights.get("activities", 35) / 35
+    trans_w  = budget_weights.get("transport", 25) / 25
+    # Blend into a single cost multiplier (accommodation dominates daily budget)
+    cost_mult = (accom_w * 0.45) + (act_w * 0.30) + (trans_w * 0.25)
+
     if not stops:
         city = CITIES[destination]
-        low  = city["daily_budget_eur"] * days
-        high = int(low * 1.4)
+        base = city["daily_budget_eur"] * days * cost_mult
+        low  = int(base * 0.85)
+        high = int(base * 1.35)
         return {"low": low, "high": high, "currency": "EUR",
                 "breakdown": [{
                     "city": destination,
                     "tier": city["price_tier"],
                     "days": days,
-                    "est":  low,
+                    "est":  int(base),
                 }]}
 
     days_per_stop = max(days // max(len(stops), 1), 1)
@@ -312,7 +324,7 @@ def _estimate_cost(stops: list, days: int, origin: str, destination: str) -> dic
     total = 0
     for stop in stops:
         city = CITIES[stop["city"]]
-        est  = city["daily_budget_eur"] * days_per_stop
+        est  = int(city["daily_budget_eur"] * days_per_stop * cost_mult)
         total += est
         breakdown.append({
             "city": stop["city"],
@@ -322,7 +334,7 @@ def _estimate_cost(stops: list, days: int, origin: str, destination: str) -> dic
         })
     return {
         "low":       int(total * 0.85),
-        "high":      int(total * 1.3),
+        "high":      int(total * 1.35),
         "currency":  "EUR",
         "breakdown": breakdown,
     }
@@ -420,7 +432,14 @@ def generate_share_html(result: dict, scores: dict, traveler_type: str, descript
 
 
 # ── Main optimizer ─────────────────────────────────────────────────────────────
-def optimise_route(origin, destination, days, traveler_scores, travel_month=None) -> dict:
+def optimise_route(
+    origin, destination, days, traveler_scores,
+    travel_month=None,
+    pinned_stops=None,        # list of city names that MUST appear as stops
+    place_type_filter=None,   # list of tags to allow e.g. ["urban","coastal"] — None = all
+    budget_weights=None,      # dict {"transport":%, "accommodation":%, "activities":%} summing to 100
+    days_at_dest=None,        # int — days to spend at final destination (rest = travel + stops)
+) -> dict:
     if origin not in CITIES:
         raise ValueError(f"Unknown city: {origin}")
     if destination not in CITIES:
@@ -428,15 +447,19 @@ def optimise_route(origin, destination, days, traveler_scores, travel_month=None
     if origin == destination:
         raise ValueError("Origin and destination must be different")
 
+    pinned_stops      = [c for c in (pinned_stops or []) if c not in (origin, destination)]
+    place_type_filter = place_type_filter or []
+    budget_weights    = budget_weights or {"transport": 25, "accommodation": 40, "activities": 35}
+
     top_trait    = max(traveler_scores, key=traveler_scores.get)
     budget_score = traveler_scores.get("Budget", 3)
 
-    # ── Budget short-circuit ───────────────────────────────────────────────
-    if budget_score >= BUDGET_THRESHOLD and top_trait == "Budget":
+    # ── Budget short-circuit (skip if user pinned stops) ──────────────────
+    if budget_score >= BUDGET_THRESHOLD and top_trait == "Budget" and not pinned_stops:
         direct_km  = _city_dist(origin, destination)
         mode       = _transit_mode(origin, destination)
         hrs        = _transit_hours(origin, destination)
-        cost       = _estimate_cost([], days, origin, destination)
+        cost       = _estimate_cost([], days, origin, destination, budget_weights)
         itinerary  = [
             {"day":1,"type":"travel","headline":f"{origin} → {destination}",
              "detail":f"{mode} · approx. {hrs:.0f} hrs","city":destination},
@@ -458,27 +481,49 @@ def optimise_route(origin, destination, days, traveler_scores, travel_month=None
             "itinerary":     itinerary,
             "cost":          cost,
             "feasibility_warning": "",
+            "days_breakdown": {"travel": 1, "stays": {destination: days - 1}},
         }
 
     # ── Score candidate cities ─────────────────────────────────────────────
     detour = DETOUR_FACTORS.get(top_trait, 1.5)
+    # Widen corridor if user pinned stops that might be off-corridor
+    if pinned_stops:
+        detour = max(detour, 2.0)
+
     candidates = []
     for city_name in CITIES:
         if city_name in (origin, destination):
             continue
+        if city_name in pinned_stops:
+            continue  # pinned stops added separately below
         if not _is_feasible(origin, destination, city_name, detour):
             continue
+        # Place-type filter
+        if place_type_filter:
+            tags = CITY_TAGS.get(city_name, [])
+            if not any(t in tags for t in place_type_filter):
+                continue
         score, events = _score_city(city_name, traveler_scores, travel_month)
         candidates.append((city_name, score, events))
 
     candidates.sort(key=lambda x: x[1], reverse=True)
 
-    # Stops = days − 1, capped at 3
-    n_stops = min(max(days - 1, 1), 3)
-    chosen  = candidates[:n_stops]
+    # Reserve slots for pinned stops; fill remaining with top scored candidates
+    n_stops    = min(max(days - 1, 1), 3)
+    n_fill     = max(n_stops - len(pinned_stops), 0)
+    chosen     = candidates[:n_fill]
+
+    # Score pinned stops too (for events / narrative)
+    pinned_scored = []
+    for p in pinned_stops:
+        if p in CITIES:
+            sc, ev = _score_city(p, traveler_scores, travel_month)
+            pinned_scored.append((p, sc, ev))
+
+    all_stops_unordered = pinned_scored + chosen
 
     # ── Order stops geographically (greedy nearest-neighbour) ──────────────
-    remaining, ordered, current = list(chosen), [], origin
+    remaining, ordered, current = list(all_stops_unordered), [], origin
     while remaining:
         remaining.sort(key=lambda x: _city_dist(current, x[0]))
         nxt = remaining.pop(0)
@@ -497,6 +542,7 @@ def optimise_route(origin, destination, days, traveler_scores, travel_month=None
             "highlights": city["highlights"],
             "events":     events,
             "why":        _explain(city_name, traveler_scores, events),
+            "pinned":     city_name in pinned_stops,
         })
 
     full_route = [origin] + [s["city"] for s in stops] + [destination]
@@ -505,19 +551,38 @@ def optimise_route(origin, destination, days, traveler_scores, travel_month=None
     # ── Feasibility check ──────────────────────────────────────────────────
     tight, warning = _check_feasibility(full_route, days)
 
+    # ── Days breakdown ─────────────────────────────────────────────────────
+    legs = list(zip(full_route, full_route[1:]))
+    total_transit_hrs = sum(_transit_hours(a, b) for a, b in legs)
+    travel_days = round(total_transit_hrs / 10.0, 1)
+    explore_days = max(days - travel_days, len(stops) * 0.5)
+    days_per_stop = round(explore_days / max(len(stops) + (1 if days_at_dest else 0), 1), 1)
+    dest_days = days_at_dest if days_at_dest else days_per_stop
+
+    stays = {s["city"]: days_per_stop for s in stops}
+    stays[destination] = dest_days
+
+    days_breakdown = {
+        "travel_days":     round(travel_days, 1),
+        "explore_days":    round(explore_days, 1),
+        "stays":           stays,
+        "dest_days":       round(dest_days, 1),
+    }
+
     # ── Itinerary + cost ───────────────────────────────────────────────────
     itinerary = _build_itinerary(origin, stops, destination, days, travel_month)
-    cost      = _estimate_cost(stops, days, origin, destination)
+    cost      = _estimate_cost(stops, days, origin, destination, budget_weights)
 
     return {
-        "waypoints":          full_route,
-        "stops":              stops,
-        "direct":             False,
-        "direct_reason":      None,
-        "transport_tip":      TRANSPORT_ADVICE.get(top_trait, TRANSPORT_ADVICE["Culture"]),
-        "total_km":           round(total_km),
-        "month":              MONTH_NAMES.get(travel_month),
-        "itinerary":          itinerary,
-        "cost":               cost,
+        "waypoints":           full_route,
+        "stops":               stops,
+        "direct":              False,
+        "direct_reason":       None,
+        "transport_tip":       TRANSPORT_ADVICE.get(top_trait, TRANSPORT_ADVICE["Culture"]),
+        "total_km":            round(total_km),
+        "month":               MONTH_NAMES.get(travel_month),
+        "itinerary":           itinerary,
+        "cost":                cost,
         "feasibility_warning": warning,
+        "days_breakdown":      days_breakdown,
     }

@@ -1009,13 +1009,61 @@ elif page == "router":
         month_name = st.selectbox("Month of travel", list(MONTH_NAMES.values()),
                                   index=5)  # June default
     with c4:
-        days = st.slider("Days available", min_value=1, max_value=10, value=3)
+        days = st.slider("Days available", min_value=2, max_value=14, value=5)
 
     travel_month = next(k for k, v in MONTH_NAMES.items() if v == month_name)
 
     if origin == destination:
         st.warning("Origin and destination can't be the same city.")
         st.stop()
+
+    # ── Advanced levers (collapsible) ──────────────────────────────────────
+    with st.expander("⚙️  Advanced options", expanded=False):
+
+        st.markdown("**📍 Must-visit stops**")
+        st.caption("Pin cities that must appear in your route — the optimizer builds around them.")
+        pinnable = [city_name_to_label(c) for c in sorted(CITIES)
+                    if c not in (origin, destination)]
+        pinned_labels = st.multiselect(
+            "Pin stops", pinnable,
+            default=[], label_visibility="collapsed",
+            placeholder="Choose cities to pin…"
+        )
+        pinned_stops = [city_label_to_name(l) for l in pinned_labels]
+
+        st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
+        st.markdown("**🏙️ Place type**")
+        st.caption("Filter suggested stops by destination character. Leave all unchecked to allow any.")
+        pt_col1, pt_col2, pt_col3, pt_col4 = st.columns(4)
+        with pt_col1: want_urban   = st.checkbox("🏙 Urban",    value=False)
+        with pt_col2: want_coastal = st.checkbox("🏖 Coastal",  value=False)
+        with pt_col3: want_historic= st.checkbox("🏰 Historic", value=False)
+        with pt_col4: want_nature  = st.checkbox("🌲 Nature",   value=False)
+
+        place_type_filter = []
+        if want_urban:    place_type_filter.append("urban")
+        if want_coastal:  place_type_filter.append("coastal")
+        if want_historic: place_type_filter.append("historic")
+        if want_nature:   place_type_filter.append("nature")
+
+        st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
+        st.markdown("**💶 Budget allocation**")
+        st.caption("Adjust how your daily budget is split. Sliders move together — total always = 100%.")
+
+        trans_pct = st.slider("🚆 Transportation %", 10, 50, 25, step=5)
+        accom_pct = st.slider("🏨 Accommodation %",  10, 60, 40, step=5)
+        acts_pct  = max(100 - trans_pct - accom_pct, 5)
+        st.markdown(
+            f'<p style="font-size:.78rem;color:var(--muted);margin-top:-.3rem">'
+            f'🍽 Activities & food: <strong>{acts_pct}%</strong> (remainder)</p>',
+            unsafe_allow_html=True
+        )
+        budget_weights = {"transport": trans_pct, "accommodation": accom_pct, "activities": acts_pct}
+
+        st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
+        st.markdown("**🏁 Days at final destination**")
+        st.caption("Reserve days for your destination. Remaining days go to stops and travel.")
+        days_at_dest = st.slider("Days at destination", 1, max(days - 1, 1), min(2, max(days - 1, 1)))
 
     st.markdown("<div style='height:.25rem'></div>", unsafe_allow_html=True)
     _, run_col, _ = st.columns([1, 2, 1])
@@ -1030,6 +1078,10 @@ elif page == "router":
                     origin=origin, destination=destination,
                     days=days, traveler_scores=active_scores,
                     travel_month=travel_month,
+                    pinned_stops=pinned_stops,
+                    place_type_filter=place_type_filter,
+                    budget_weights=budget_weights,
+                    days_at_dest=days_at_dest,
                 )
             except Exception as e:
                 st.error(f"Couldn't build a route: {e}")
@@ -1134,6 +1186,42 @@ elif page == "router":
           </div>
         </div>""", unsafe_allow_html=True)
 
+        # ── Days breakdown bar ────────────────────────────────────────────
+        bd = result.get("days_breakdown", {})
+        if bd:
+            travel_d  = bd.get("travel_days", 0)
+            explore_d = bd.get("explore_days", 0)
+            dest_d    = bd.get("dest_days", 0)
+            total_d   = max(travel_d + explore_d, 1)
+            travel_pct  = int((travel_d  / total_d) * 100)
+            explore_pct = int((explore_d / total_d) * 100)
+            dest_pct    = max(100 - travel_pct - explore_pct, 0)
+
+            stays_html = "".join(
+                f'<span style="background:#f1f5f9;border-radius:99px;padding:.15rem .6rem;'
+                f'font-size:.72rem;font-weight:600;color:#374151;margin-right:.3rem">'
+                f'{city}: {d:.0f}d</span>'
+                for city, d in bd.get("stays", {}).items()
+            )
+            st.markdown(f"""
+            <div class="card" style="padding:1rem 1.25rem;margin-bottom:.75rem">
+              <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;
+                          letter-spacing:.07em;color:var(--muted);margin-bottom:.5rem">
+                Days breakdown
+              </div>
+              <div style="display:flex;border-radius:.4rem;overflow:hidden;height:1.1rem;margin-bottom:.55rem">
+                <div style="width:{travel_pct}%;background:#9ca3af" title="Travel days"></div>
+                <div style="width:{explore_pct - dest_pct}%;background:#1375f0" title="Stop exploration"></div>
+                <div style="width:{dest_pct}%;background:#1bb368" title="Destination days"></div>
+              </div>
+              <div style="display:flex;gap:1rem;font-size:.73rem;color:var(--muted);margin-bottom:.5rem">
+                <span><span style="display:inline-block;width:.55rem;height:.55rem;border-radius:2px;background:#9ca3af;margin-right:.25rem"></span>Transit ~{travel_d:.1f}d</span>
+                <span><span style="display:inline-block;width:.55rem;height:.55rem;border-radius:2px;background:#1375f0;margin-right:.25rem"></span>Stops ~{explore_d - dest_d:.1f}d</span>
+                <span><span style="display:inline-block;width:.55rem;height:.55rem;border-radius:2px;background:#1bb368;margin-right:.25rem"></span>{destination} ~{dest_d:.1f}d</span>
+              </div>
+              <div>{stays_html}</div>
+            </div>""", unsafe_allow_html=True)
+
         # ── Transport tip ─────────────────────────────────────────────────
         st.markdown(f'<div class="tip-box">{result["transport_tip"]}</div>',
                     unsafe_allow_html=True)
@@ -1164,11 +1252,12 @@ elif page == "router":
                     f'<span class="stop-event">🎟 {ev}</span>'
                     for ev in stop["events"]
                 )
-                tier_html = f'<span class="stop-tier">{stop["price_tier"]} per day</span>'
+                tier_html   = f'<span class="stop-tier">{stop["price_tier"]} per day</span>'
+                pinned_html = '<span style="background:#fef9c3;color:#854d0e;font-size:.7rem;font-weight:700;border-radius:99px;padding:.15rem .6rem;margin-left:.4rem">📌 Pinned</span>' if stop.get("pinned") else ""
                 hl = " · ".join(stop["highlights"])
                 st.markdown(f"""
                 <div class="stop-card">
-                  <div class="stop-city">📍 {stop["city"]}</div>
+                  <div class="stop-city">📍 {stop["city"]}{pinned_html}</div>
                   <div class="stop-meta">{stop["country"]} {tier_html}</div>
                   <div class="stop-why">{stop["why"]}</div>
                   <div class="stop-hl">✦ {hl}</div>
@@ -1203,6 +1292,28 @@ elif page == "router":
         # ── Budget breakdown ──────────────────────────────────────────────
         with st.expander("💶  Budget breakdown"):
             if cost["breakdown"]:
+                # Budget allocation bar
+                t_pct = budget_weights["transport"]
+                a_pct = budget_weights["accommodation"]
+                f_pct = budget_weights["activities"]
+                st.markdown(f"""
+                <div style="margin-bottom:.85rem">
+                  <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;
+                              letter-spacing:.07em;color:var(--muted);margin-bottom:.4rem">
+                    Your budget split
+                  </div>
+                  <div style="display:flex;border-radius:.4rem;overflow:hidden;height:.85rem;margin-bottom:.35rem">
+                    <div style="width:{t_pct}%;background:#0ea5e9" title="Transport"></div>
+                    <div style="width:{a_pct}%;background:#8b5cf6" title="Accommodation"></div>
+                    <div style="width:{f_pct}%;background:#f59e0b" title="Activities"></div>
+                  </div>
+                  <div style="display:flex;gap:.85rem;font-size:.72rem;color:var(--muted)">
+                    <span><span style="color:#0ea5e9;font-weight:700">●</span> Transport {t_pct}%</span>
+                    <span><span style="color:#8b5cf6;font-weight:700">●</span> Accommodation {a_pct}%</span>
+                    <span><span style="color:#f59e0b;font-weight:700">●</span> Activities {f_pct}%</span>
+                  </div>
+                </div>""", unsafe_allow_html=True)
+
                 rows = "".join(f"""
                 <div style="display:flex;justify-content:space-between;padding:.4rem 0;
                              border-bottom:1px solid #f3f4f6;font-size:.85rem">
@@ -1218,7 +1329,7 @@ elif page == "router":
                 st.markdown(
                     f'<div style="padding:.5rem 0">{rows}{total_row}'
                     f'<p style="font-size:.75rem;color:var(--muted);margin-top:.6rem">'
-                    f'Includes mid-range accommodation, meals, and activities. '
+                    f'Estimate reflects your budget allocation. '
                     f'Excludes flights and transport between cities.</p></div>',
                     unsafe_allow_html=True
                 )
