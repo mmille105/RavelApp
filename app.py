@@ -778,6 +778,23 @@ if page == "profile":
 
     # ── 10: Results ────────────────────────────────────────────────────────
     elif step == 10:
+        stc.html("""
+        <script>
+          /* scroll-results */
+          (function() {
+            var tries = 0;
+            function scrollUp() {
+              var el = window.parent.document.querySelector('section[data-testid="stMain"]')
+                    || window.parent.document.querySelector('.main');
+              if (el) { el.scrollTo({top: 0, behavior: 'instant'}); }
+              window.parent.scrollTo(0, 0);
+              if (tries++ < 8) setTimeout(scrollUp, 60);
+            }
+            scrollUp();
+          })();
+        </script>
+        """, height=0)
+
         # Recalculate only if we have raw responses (fresh quiz completion).
         # If we were restored from URL params, session scores are already set.
         if st.session_state.responses:
