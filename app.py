@@ -167,46 +167,27 @@ html, body, [data-testid="stAppViewContainer"] {
 .cat-name { font-size:1.4rem; font-weight:800; }
 .cat-sub  { font-size:.88rem; color:var(--muted); margin-bottom:1.5rem; }
 
-/* ── Radio pill buttons ── */
-
-/* Kill the "rating" ghost label — collapsed labels still render in some browsers */
-div[data-testid="stRadio"] [data-testid="stWidgetLabel"],
-div[data-testid="stRadio"] [data-testid="stWidgetLabel"] * {
-  display: none !important;
-  height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-}
-
-/* 5-column grid — always fits, any screen width */
+/* ── Nav radio (2 options) — clean horizontal tabs ── */
 div[data-testid="stRadio"] div[role="radiogroup"] {
-  display: grid !important;
-  grid-template-columns: repeat(5, 1fr) !important;
-  gap: .35rem !important;
-  margin-top: .5rem !important;
-  width: 100% !important;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: .4rem !important;
+  margin-top: 0 !important;
 }
-
-/* Individual option pills */
 div[data-testid="stRadio"] div[role="radiogroup"] label {
   background: #f1f5f9 !important;
   border: 1.5px solid var(--border) !important;
   border-radius: .6rem !important;
-  padding: .5rem .25rem !important;
-  font-size: .78rem !important;
+  padding: .45rem 1.1rem !important;
+  font-size: .88rem !important;
   font-weight: 500 !important;
   cursor: pointer !important;
   transition: background .12s, border-color .12s, color .12s !important;
-  white-space: normal !important;
-  word-break: break-word !important;
+  white-space: nowrap !important;
   color: var(--text) !important;
-  text-align: center !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  line-height: 1.3 !important;
-  min-height: 2.4rem !important;
 }
 div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
   background: var(--blue) !important;
@@ -216,6 +197,54 @@ div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
 }
 div[data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {
   display: none !important;
+}
+
+/* ── Quiz radio pills — scoped to inside st.form only ── */
+
+/* Kill the "rating" ghost label */
+[data-testid="stForm"] div[data-testid="stRadio"] [data-testid="stWidgetLabel"],
+[data-testid="stForm"] div[data-testid="stRadio"] [data-testid="stWidgetLabel"] * {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 5-column grid — always fits any screen width */
+[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] {
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: .35rem !important;
+  margin-top: .5rem !important;
+  width: 100% !important;
+}
+
+/* Quiz pill cells */
+[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label {
+  background: #f1f5f9 !important;
+  border: 1.5px solid var(--border) !important;
+  border-radius: .6rem !important;
+  padding: .5rem .2rem !important;
+  font-size: .78rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  color: var(--text) !important;
+  text-align: center !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1.3 !important;
+  min-height: 2.4rem !important;
+  transition: background .12s, border-color .12s, color .12s !important;
+}
+[data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
+  background: var(--blue) !important;
+  border-color: var(--blue) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
 }
 
 /* ── Question card wrapper for quiz ── */
@@ -1076,9 +1105,5 @@ elif page == "router":
               🤝 <strong>Group route blending</strong><br>
               <span style="color:var(--muted)">Combine profiles from multiple travellers into one optimised shared route</span>
             </div>
-          </div>
-          <div style="margin-top:.85rem;font-size:.78rem;color:var(--muted)">
-            Built on Ravel · <a href="https://ravel.travel" target="_blank"
-            style="color:var(--blue);text-decoration:none;font-weight:600">ravel.travel</a>
           </div>
         </div>""", unsafe_allow_html=True)

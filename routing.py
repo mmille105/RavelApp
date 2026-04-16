@@ -412,7 +412,7 @@ def generate_share_html(result: dict, scores: dict, traveler_type: str, descript
   {stops_html if stops_html else "<p style='font-size:13px;color:#6b7280'>Direct route — no stopovers.</p>"}
 
   <div class="footer">
-    Built with <strong>Ravel</strong> · ravel.travel
+    Ravel · Phase 1 Prototype
   </div>
 </div>
 </body>
