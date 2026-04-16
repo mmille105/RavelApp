@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as stc
 import plotly.graph_objects as go
 import json
 
@@ -606,6 +607,24 @@ if page == "profile":
 
     # ── 1-6: Questions ────────────────────────────────────────────────────
     elif 1 <= step <= 6:
+        # Scroll to top of page on every step load (fires on Next / Back only,
+        # since questions live inside st.form which suppresses interim reruns)
+        stc.html("""
+        <script>
+          (function() {
+            var tries = 0;
+            function scrollUp() {
+              var el = window.parent.document.querySelector('section[data-testid="stMain"]')
+                    || window.parent.document.querySelector('.main');
+              if (el) { el.scrollTo({top: 0, behavior: 'smooth'}); }
+              window.parent.scrollTo(0, 0);
+              if (tries++ < 5) setTimeout(scrollUp, 80);
+            }
+            scrollUp();
+          })();
+        </script>
+        """, height=0)
+
         data = STEPS[step - 1]
         pct  = int(((step-1) / 6) * 100)
         st.markdown(f"""
