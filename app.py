@@ -78,18 +78,18 @@ html, body, [data-testid="stAppViewContainer"] {
   /* Nav: stack wordmark above nav pills */
   [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; }
 
-  /* Pills: tighter padding on mobile, grid already handles sizing */
-  div[data-testid="stRadio"] div[role="radiogroup"] {
-    gap: .25rem !important;
+  /* Quiz pills on mobile — numeric digits, compact square */
+  [data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] {
+    gap: .3rem !important;
   }
-  div[data-testid="stRadio"] div[role="radiogroup"] label {
-    font-size: .72rem !important;
-    padding: .45rem .15rem !important;
-    min-height: 2.6rem !important;
+  [data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    padding: .6rem .1rem !important;
+    min-height: 2.75rem !important;
   }
 
-  /* Scale legend: hide on mobile (redundant with pill text) */
-  .q-scale-legend { display: none !important; }
+  /* Scale legend: stays visible on mobile — numbers need the context */
 
   /* Stat pills: 2 columns on mobile */
   .stat-row { gap: .5rem !important; }
@@ -220,25 +220,25 @@ div[data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {
   width: 100% !important;
 }
 
-/* Quiz pill cells */
+/* Quiz pill cells — single digit numbers, clean square */
 [data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label {
   background: #f1f5f9 !important;
   border: 1.5px solid var(--border) !important;
   border-radius: .6rem !important;
-  padding: .5rem .2rem !important;
-  font-size: .78rem !important;
-  font-weight: 500 !important;
+  padding: .55rem .1rem !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
   cursor: pointer !important;
-  white-space: normal !important;
-  word-break: break-word !important;
+  white-space: nowrap !important;
   color: var(--text) !important;
   text-align: center !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  line-height: 1.3 !important;
-  min-height: 2.4rem !important;
+  line-height: 1 !important;
+  min-height: 2.75rem !important;
   transition: background .12s, border-color .12s, color .12s !important;
+  letter-spacing: 0 !important;
 }
 [data-testid="stForm"] div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
   background: var(--blue) !important;
@@ -267,8 +267,9 @@ div[data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {
   justify-content: space-between;
   font-size: .7rem;
   color: var(--muted);
-  margin-bottom: .35rem;
+  margin-bottom: .4rem;
   padding: 0 .1rem;
+  font-weight: 500;
 }
 
 /* ── Primary button ── */
@@ -410,11 +411,11 @@ CAT_COLORS = {
     "Relaxation":"#f59e0b","Food":"#ef4444","Shopping":"#ec4899",
 }
 
-# Short labels keep pills on one row and look clean
-LIKERT      = ["Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"]
-LIKERT_NUMS = ["1", "2", "3", "4", "5"]   # numeric-only fallback if needed
+# Numeric pills — always fit any screen width; legend provides context
+LIKERT = ["1", "2", "3", "4", "5"]
 
 def likert_val(label: str) -> int:
+    """Convert pill label to 1-5 int score."""
     return LIKERT.index(label) + 1
 
 def render_score_bars(scores):
@@ -608,8 +609,8 @@ if page == "profile":
                 <div class="q-card">
                   <div class="q-text">{i+1}. {text}</div>
                   <div class="q-scale-legend">
-                    <span>← Strongly disagree</span>
-                    <span>Strongly agree →</span>
+                    <span>1 = Strongly disagree</span>
+                    <span>5 = Strongly agree</span>
                   </div>
                 </div>""", unsafe_allow_html=True)
                 resp[qid] = st.radio(
